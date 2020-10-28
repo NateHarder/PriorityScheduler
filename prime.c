@@ -13,10 +13,12 @@ char *pid;
 char *prior;
 long unsigned int nextPrime;
 
-long unsigned int calculatedPrime = 123400003;
 void stopHandler(int signum);
 void contHandler(int signum);
 void termHandler(int signum);
+
+long unsigned int calculatedPrime = 123400003;
+
 int checkPrimeAndPrint(unsigned long int toCheck);
 
 /*
@@ -40,7 +42,6 @@ signal(SIGTERM, termHandler);
        long unsigned int numberToCheck = calculatedPrime +1; 
        while (numPrinted <10) {
            if (checkPrimeAndPrint(numberToCheck) ==1){ 
-              printf("prime number is %lu \n", numberToCheck);
               nextPrime = numberToCheck;
               numPrinted++;
            }
