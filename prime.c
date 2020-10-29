@@ -31,8 +31,8 @@ and prints a starting message.
 int main(int argc, char** argv){
 int p = getpid();
 num = argv[1];
-pid = argv[2];
-prior = argv[3];
+pid = getpid();
+prior = argv[2];
 printf("Process %s: My Priority is %s, my PID is %s: I just got started.\n", num, pid, prior);
 printf("I am starting with the number %llu to find the next prime number.", calculatedPrime);
 signal(SIGTSTP, stopHandler);
