@@ -8,7 +8,7 @@
             "name": "Debug",
             "type": "gdb",
             "request": "launch",
-            "target": "./prime.out",
+            "target": "./priority.out",
             "cwd": "${workspaceRoot}",
             "arguments": "input.txt",
             "valuesFormatting": "parseText"
