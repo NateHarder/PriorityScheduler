@@ -23,9 +23,11 @@ struct process *processes;
 struct process *current;
 struct process waiting[10];
 struct process *proc_to_stop;
+
 int time;
 int process_count = 0;
 int context_switch = 0;
+int active[10];
 int running = 0;
 int finished = 0;
 int done = 0;
@@ -100,75 +102,102 @@ void receive(FILE *file) {
 }
 
 void timer_handler() {
-    time++;
-    printf("Scheduler: Time now: %d seconds\n", time);
-    current->burst--;
-    int pid;
-    if (running == 1) {
-        for (int i = 0; i < process_count; i++) {
-            if (processes[i].burst > -1 && context_switch == 0) {
-                if (processes[i].proc_num == current->proc_num && current->burst == 0) {
-                    processes[i].burst = -1;
-                } else if ( (processes[i].prior < current->prior || current->burst < 0 ) && processes[i].proc_num != current->proc_num) {
-                    push_waiting(*current);
-                    proc_to_stop = current;
-                    current = &processes[i];
-                    for (int j = i+1; j < process_count; j++) {
-                        if (processes[i].arrival == processes[j].arrival && processes[i].prior > processes[j].prior) {
-                            current = &processes[j];
-                            context_switch = 1;
-                            push_waiting(processes[i]);
-                        } else if (processes[i].arrival < processes[j].arrival && processes[i].prior == processes[j].prior) {
-                            //current = &processes[i];
-                            push_waiting(processes[j]);
-                            context_switch = 1;
+    if (done == 0) {
+        time++;
+        current->burst--;
+        if (current->burst < 0) {
+            current->prior = process_count;
+        }
+        int pid;
+        if (running == 1) {
+            for (int i = 0; i < process_count; i++) {
+                if (processes[i].burst > -1 && context_switch == 0) {
+                    if (processes[i].proc_num == current->proc_num && current->burst <= 0) {
+                        processes[i].burst = -1;
+                    } else if (processes[i].prior < current->prior && processes[i].proc_num != current->proc_num) {
+                        push_waiting(*current);
+                        proc_to_stop = current;
+                        current = &processes[i];
+                        for (int j = i+1; j < process_count; j++) {
+                            if (processes[i].arrival == processes[j].arrival && processes[i].prior > processes[j].prior) {
+                                current = &processes[j];
+                                context_switch = 1;
+                                push_waiting(processes[i]);
+                            } else if (processes[i].arrival < processes[j].arrival && processes[i].prior == processes[j].prior) {
+                                //current = &processes[i];
+                                push_waiting(processes[j]);
+                                context_switch = 1;
+                            }
+                            break;
                         }
-                        break;
                     }
                 }
             }
         }
-    }
-    if (current->pid == 0 && current->prior !=0) {
-        pid = fork();
-        if (pid == 0) {
-            execlp("./prime.o", "./prime.o", current->proc_num, current->prior);
-        } else if (running == 0) {
-            current->pid = pid;
-            printf("Scheduler: Time now: %d seconds\n", time);
-            printf("Scheduling process %d (PID %d)\n\n", current->proc_num, current->pid);
-            running = 1;
+        if (current->pid == 0 && current->burst > -1) {
+            fflush(stdout);
+            pid = fork();
+            if (pid == 0) {
+                fflush(stdout);
+                char numstr[10];
+                int proc_num = current->proc_num;
+                sprintf(numstr, "%d", proc_num);
+                int prior = current->prior;
+                char priorstr[10];
+                sprintf(priorstr, "%d", prior);
+                execlp("./prime.o", "./prime.o", numstr, priorstr, NULL);
+            } else {
+                current->pid = pid;
+                running = 1;
+                printf("Scheduler: Time now: %d seconds\n", time);
+                printf( "Scheduling process %d (PID %d)\n\n", current->proc_num, current->pid);
+            }
         }
-    }
-    if(pid != 0) {
-        if(context_switch == 1) {
-            kill(proc_to_stop->pid, SIGTSTP);
-            printf("Suspending process %d (PID %d) and resuming process %d (PID %d)\n",
-                    proc_to_stop->proc_num, proc_to_stop->pid,current->proc_num, current->pid);
-            //*current = waiting[top];
-            //pop_waiting();
-            kill(current->pid, SIGCONT);
-            printf("Scheduler: Time now: %d seconds\n", time);
-            context_switch = 0;
-        }
-        if (current->burst <= 0) {
-            running = 0;
-            kill(current->pid, SIGTERM);
-            printf("Scheduler: Time now: %d seconds\n", time);
-            printf("Terminating process %d (PID %d)\n", current->proc_num, current->pid);
-            finished++;
-            if (top > -1) {
-                if (waiting[top].prior !=0) {
-                    *current = waiting[top];
-                    pop_waiting();
+        if(pid != 0) {
+            if(context_switch == 1) {
+                char *message;
+                int resume = 1;
+                message = "resuming";
+                if (active[current->proc_num] == 0) {
+                    message = "starting";
+                    resume = 0;
                 }
+                printf( "Suspending process %d (PID %d) and %s process %d (PID %d)\n\n",
+                        proc_to_stop->proc_num, proc_to_stop->pid, message, current->proc_num, current->pid);
+                kill(proc_to_stop->pid, SIGTSTP);
+                //waitpid(proc_to_stop->pid,NULL,0);
+                //waitpid(current->pid,NULL,0);
+                if (resume == 1) {
+                kill(current->pid, SIGCONT);
+                } else {
+                    printf("Scheduler: Time now: %d seconds\n", time);
+                    printf("Scheduling process %d (PID %d)\n\n", current->proc_num, current->pid);
+                }
+                context_switch = 0;
             }
-            if (finished >= process_count) {
-                done = 1;
-                return;
-            }
-        }   
+
+            active[current->proc_num] = 1;
+            if (current->burst <= 0) {
+                kill(current->pid, SIGTERM);
+                waitpid(current->pid,NULL,0);
+                kill(waiting[top].pid, SIGCONT);
+                printf("Scheduler: Time now: %d seconds\n", time);
+                printf("Terminating process %d (PID %d)\n\n", current->proc_num, current->pid);
+                finished++;
+                if (top > -1) {
+                    if (waiting[top].prior !=0) {
+                        *current = waiting[top];
+                        pop_waiting();
+                    }
+                }
+                if (finished >= process_count) {
+                    done = 1;
+                } else if (current->prior == process_count && current->pid != 0) {
+                    printf("Scheduler: Time now: %d seconds\n", time);
+                    printf( "Scheduling process %d (PID %d)\n\n", current->proc_num, current->pid);
+                }
+            }   
+        }
     }
 }
-
 
