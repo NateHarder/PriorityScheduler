@@ -55,9 +55,8 @@ int main(int argc, char **argv){
     /* Start a reaktimer. It counts down whenever this process isexecuting. */
     setitimer (ITIMER_REAL, &timer, NULL);
     while (done == 0) {}
-    wait(5);
+    wait(NULL);
     free(processes);
-    printf("Processes Finished");
     exit(0); 
 }
 
