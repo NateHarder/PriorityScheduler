@@ -57,7 +57,7 @@ int main(int argc, char** argv){
     int numPrinted = 0;
     long long unsigned int numberToCheck = calculatedPrime +1; 
     while (numPrinted <10) {
-        if (checkPrimeAndPrint(numberToCheck) ==1){ 
+        if (checkPrimeAndPrint(numberToCheck) == 1) { 
             nextPrime = numberToCheck;
             numPrinted++;
         }

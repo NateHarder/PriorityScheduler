@@ -123,12 +123,11 @@ void timer_handler() {
                         for (int j = i+1; j < process_count; j++) {
                             if (processes[i].arrival == processes[j].arrival && processes[i].prior > processes[j].prior) {
                                 current = &processes[j];
-                                context_switch = 1;
                                 push_waiting(processes[i]);
+                                context_switch = 1;
                             } else if (processes[i].arrival < processes[j].arrival && processes[i].prior == processes[j].prior) {
                                 //current = &processes[i];
                                 push_waiting(processes[j]);
-                                context_switch = 1;
                             }
                             break;
                         }
@@ -141,6 +140,11 @@ void timer_handler() {
         if (active[current->proc_num] == 2) {
             kill(current->pid, SIGCONT);
         }
+
+        //if (active[proc_to_stop->proc_num] != 1) {
+           // context_switch = 0;
+        //}
+
 
         if (current->pid == 0 && current->burst > -1) {
             fflush(stdout);
@@ -189,6 +193,7 @@ void timer_handler() {
                 printf("Scheduler: Time now: %d seconds\n", time);
                 printf("Terminating process %d (PID %d)\n\n", current->proc_num, current->pid);
                 kill(current->pid, SIGTERM);
+                active[current->proc_num] = 0;
                 finished++;
                 if (top > -1) {
                     if (waiting[top].prior !=0) {
