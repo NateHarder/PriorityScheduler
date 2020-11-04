@@ -56,7 +56,8 @@ int main(int argc, char **argv){
     setitimer (ITIMER_REAL, &timer, NULL);
     while (done == 0) {}
     free(processes);
-    //exit(0); 
+    printf("Processes Finished");
+    exit(0); 
 }
 
 
