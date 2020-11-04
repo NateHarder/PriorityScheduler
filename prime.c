@@ -52,12 +52,10 @@ int main(int argc, char** argv){
     memset(&sigterm_action, 0, sizeof(sigterm_action));
     sigterm_action.sa_handler = &termHandler;
     sigaction(SIGTERM, &sigterm_action, NULL);
-    //fflush(stdout);
     printf("Process %s: My Priority is %s, my PID is %d: I just got started.\n", num, prior, pid);
-    //fflush(stdout);
     printf("I am starting with the number %llu to find the next prime number.\n\n", calculatedPrime);
     int numPrinted = 0;
-    long unsigned int numberToCheck = calculatedPrime +1; 
+    long long unsigned int numberToCheck = calculatedPrime +1; 
     while (numPrinted <10) {
         if (checkPrimeAndPrint(numberToCheck) ==1){ 
             nextPrime = numberToCheck;
@@ -76,7 +74,6 @@ and prints a message.
 void stopHandler(int signum){
     printf( "Process %s: My Priority is %s, my PID is %d: I am about to be\n", num, prior, pid);
     printf( "suspended... Highest prime number I found is %llu.\n\n", nextPrime);
-    //fflush(stdout);
 }
 
 /*
@@ -88,7 +85,6 @@ and prints a message.
 void contHandler(int signum){
     printf( "Process %s: My Priority is %s, my PID is %d: I just got resumed.\n",  num, prior, pid);
     printf( "Highest prime number I found is %llu.\n\n", nextPrime); 
-    //fflush(stdout);
 }
 
 /*
@@ -100,7 +96,6 @@ and prints a message.
 void termHandler(int signum) {
     printf( "Process %s: My Priority is %s, my PID is %d: I completed my task\n", num, prior, pid);
     printf( "and I am exiting. Highest prime number I found is %llu.\n\n", nextPrime);
-    //fflush(stdout);
 }
 
 /*
