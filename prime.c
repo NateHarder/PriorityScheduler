@@ -12,13 +12,13 @@ Name of this file: prime.c
 char *num;
 int pid;
 char *prior;
-long unsigned int nextPrime;
+long long unsigned int nextPrime;
 
 void stopHandler(int signum);
 void contHandler(int signum);
 void termHandler(int signum);
 
-long unsigned int calculatedPrime = 123400003;
+long long unsigned int calculatedPrime = 123400003;
 
 int checkPrimeAndPrint(unsigned long int toCheck);
 
