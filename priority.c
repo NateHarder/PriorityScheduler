@@ -108,6 +108,7 @@ void timer_handler() {
         if (current->burst < 0) {
             current->prior = process_count;
         }
+
         int pid;
         if (running == 1) {
             for (int i = 0; i < process_count; i++) {
@@ -134,6 +135,12 @@ void timer_handler() {
                 }
             }
         }
+
+        // If the next process in the waiting list is paused, send a continue signal.
+        if (active[current->proc_num] == 2) {
+            kill(current->pid, SIGCONT);
+        }
+
         if (current->pid == 0 && current->burst > -1) {
             fflush(stdout);
             pid = fork();
@@ -148,9 +155,11 @@ void timer_handler() {
                 execlp("./prime.o", "./prime.o", numstr, priorstr, NULL);
             } else {
                 current->pid = pid;
-                running = 1;
-                printf("Scheduler: Time now: %d seconds\n", time);
-                printf( "Scheduling process %d (PID %d)\n\n", current->proc_num, current->pid);
+                if (running == 0) {
+                    running = 1;
+                    printf("Scheduler: Time now: %d seconds\n", time);
+                    printf( "Scheduling to process %d (PID %d)\n\n", current->proc_num, current->pid);
+                }
             }
         }
         if(pid != 0) {
@@ -162,27 +171,23 @@ void timer_handler() {
                     message = "starting";
                     resume = 0;
                 }
-                printf( "Suspending process %d (PID %d) and %s process %d (PID %d)\n\n",
+                // stop first process and resume second process (or start if not active).
+                printf("Suspending process %d (PID %d) and %s process %d (PID %d)\n\n",
                         proc_to_stop->proc_num, proc_to_stop->pid, message, current->proc_num, current->pid);
                 kill(proc_to_stop->pid, SIGTSTP);
-                //waitpid(proc_to_stop->pid,NULL,0);
-                //waitpid(current->pid,NULL,0);
+                active[proc_to_stop->proc_num] = 2;
+                // If the second process is created resume it, otherwise it will be started.
                 if (resume == 1) {
                 kill(current->pid, SIGCONT);
                 } else {
-                    printf("Scheduler: Time now: %d seconds\n", time);
-                    printf("Scheduling process %d (PID %d)\n\n", current->proc_num, current->pid);
-                }
                 context_switch = 0;
+                }
             }
-
             active[current->proc_num] = 1;
             if (current->burst <= 0) {
-                kill(current->pid, SIGTERM);
-                waitpid(current->pid,NULL,0);
-                kill(waiting[top].pid, SIGCONT);
                 printf("Scheduler: Time now: %d seconds\n", time);
                 printf("Terminating process %d (PID %d)\n\n", current->proc_num, current->pid);
+                kill(current->pid, SIGTERM);
                 finished++;
                 if (top > -1) {
                     if (waiting[top].prior !=0) {
@@ -192,10 +197,7 @@ void timer_handler() {
                 }
                 if (finished >= process_count) {
                     done = 1;
-                } else if (current->prior == process_count && current->pid != 0) {
-                    printf("Scheduler: Time now: %d seconds\n", time);
-                    printf( "Scheduling process %d (PID %d)\n\n", current->proc_num, current->pid);
-                }
+                } 
             }   
         }
     }
