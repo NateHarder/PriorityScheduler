@@ -9,6 +9,13 @@ Authors: Nathaniel Harder, Brendan Embrey
 Assignment Number: 2
 Date of Submission: 11/5/20
 Name of this file: prime.c
+
+The functions stop_handler, cont_handler, and term_handler receive stop, continue, and terminate signals and print an appropriate message showing process information and the calculated prime. They are grouped together because each one handles one of the aforementioned handles that the program may receive.
+
+The function check_prime_and_print runs a loop to determine if a number is prime. It is grouped with main because main is the only function that calls it.
+
+The function main sets up the above handler functions, then prints a start message and loops to call check_prime_and_print with increasingly high numbers to repeatedly keep finding the next prime number. It is grouped with check_prime_and_print because main is the function that calls check_prime_and_print.
+
 */
 
 /* Global variables for process number, PID, and priority. */

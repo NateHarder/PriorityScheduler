@@ -15,6 +15,27 @@ processes that execute prime.o to count and print prime numbers after a given
 prime (the default prime is 2 and can be changed by editing line 20 in the file prime.c). Runs The processes in order of their priority and arrival time and 
 suspends the processes that need to be stopped for a context switch to another
 process. Also terminates the processes when they finish.
+
+The functions push_waiting and pop_waiting push or pop an element from a waiting process stack.
+
+The above functions were grouped together because each one helps store processes that have been paused.
+
+The function receive reads input from a file and generates process structs for each of the specified files.
+
+The function check_priority is used to compare the priority and arrival times of processes to determine which one should run.
+
+The function switch_context performs a context switch between two processes.
+
+The function create_process creates new processes and runs prime.o in them.
+
+The function terminate_process terminates the current process and pulls a waiting process from the stack.
+
+The above functions were grouped together because each one performs one of the necessary tasks for priority scheduling: creating processes, terminating them, and performing process switchs.
+
+The function timer_handler runs every second and determines which of the above functions need to be called based on the current program status.
+
+The function main sends the input file to the receive function, then sets up a timer and runs the loop that the function timer handler gets executed in before exiting.
+
 */
 
 /* Struct that holds information about a process. */
