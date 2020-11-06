@@ -12,7 +12,7 @@ Date of Submission: 11/5/20
 Name of this file: priority.c
 Description of the program: Takes input from a text file and creates child
 processes that execute prime.o to count and print prime numbers after a given 
-prime. Runs The processes in order of their priority and arrival time and 
+prime (the default prime is 2 and can be changed by editing line 20 in the file prime.c). Runs The processes in order of their priority and arrival time and 
 suspends the processes that need to be stopped for a context switch to another
 process. Also terminates the processes when they finish.
 */

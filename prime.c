@@ -17,7 +17,7 @@ int pid;
 char *prior;
 
 /* The initial prime to start counting from. */
-long long unsigned int calculated_prime = 123400003;
+long long unsigned int calculated_prime = 2;
 
 /*
 Function Name: stopHandler
@@ -26,6 +26,7 @@ Brief description of the task: handles SIGTSTP signals
 and prints a message showing the calculated prime.
 */      
 void stop_handler(int signum) {
+    /* Print message showing process numbe, priority, PID, and the highest calculated prime number. */
     printf( "Process %s: My Priority is %s, my PID is %d: I am about to be\n", num, prior, pid);
     printf( "suspended... Highest prime number I found is %llu.\n\n", calculated_prime);
 }
@@ -37,6 +38,7 @@ Brief description of the task: handles SIGCONT signals
 and prints a message showing the calculated prime.
 */      
 void cont_handler(int signum){
+    /* Print message showing process numbe, priority, PID, and the highest calculated prime number. */
     printf( "Process %s: My Priority is %s, my PID is %d: I just got resumed.\n",  num, prior, pid);
     printf( "Highest prime number I found is %llu.\n\n", calculated_prime); 
 }
@@ -48,6 +50,7 @@ Brief description of the task: handles SIGTERM signals
 and prints a message showing the calculated prime.
 */      
 void term_handler(int signum) {
+    /* Print message showing process numbe, priority, PID, and the highest calculated prime number. */
     printf( "Process %s: My Priority is %s, my PID is %d: I completed my task\n", num, prior, pid);
     printf( "and I am exiting. Highest prime number I found is %llu.\n\n", calculated_prime);
 }
@@ -88,22 +91,22 @@ int main(int argc, char** argv){
     prior = argv[2];
 
     /* Set handler for the SIGTSTP signal. */
-    struct sigaction sigtstp_action;
-    memset(&sigtstp_action, 0, sizeof(sigtstp_action));
-    sigtstp_action.sa_handler = &stop_handler;
-    sigaction(SIGTSTP, &sigtstp_action, NULL);
+    struct sigaction tstp;
+    memset(&tstp, 0, sizeof(tstp));
+    tstp.sa_handler = &stop_handler;
+    sigaction(SIGTSTP, &tstp, NULL);
 
     /* Set handler for the SIGCONT signal. */
-    struct sigaction sigcont_action;
-    memset(&sigcont_action, 0, sizeof(sigcont_action));
-    sigcont_action.sa_handler = &cont_handler;
-    sigaction(SIGCONT, &sigcont_action, NULL);
+    struct sigaction cont;
+    memset(&cont, 0, sizeof(cont));
+    cont.sa_handler = &cont_handler;
+    sigaction(SIGCONT, &cont, NULL);
 
     /* Set handler for the SIGTERM signal. */
-    struct sigaction sigterm_action;
-    memset(&sigterm_action, 0, sizeof(sigterm_action));
-    sigterm_action.sa_handler = &term_handler;
-    sigaction(SIGTERM, &sigterm_action, NULL);
+    struct sigaction term;
+    memset(&term, 0, sizeof(term));
+    term.sa_handler = &term_handler;
+    sigaction(SIGTERM, &term, NULL);
 
     /* Print a message when process starts. */
     printf("Process %s: My Priority is %s, my PID is %d: I just got started.\n", num, prior, pid);
