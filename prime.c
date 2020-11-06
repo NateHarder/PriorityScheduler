@@ -3,6 +3,7 @@
 #include<signal.h>
 #include<unistd.h>
 #include<string.h>
+#include<limits.h>
 /*
 Authors: Nathaniel Harder, Brendan Embrey
 Assignment Number: 2
@@ -66,8 +67,8 @@ int check_prime_and_print(long long unsigned int to_check) {
     while (prime == 1 && i < to_check/2){ 
         if (to_check % i == 0) {
             prime = 0;
-            i++;
         }
+        i++;
     } 
     return (prime);
 }
@@ -110,9 +111,9 @@ int main(int argc, char** argv){
     
     int num_printed = 0;
     long unsigned int number_to_check = calculated_prime + 1; 
-    /* Loop 1000 times using the check_prime_and_print function to find the 
+    /* Loop up to INT_MAX times using the check_prime_and_print function to find the 
     next prime after the previously found prime. */
-    while (num_printed < 1000) {
+    while (num_printed < INT_MAX) {
         if (check_prime_and_print(number_to_check) == 1) { 
             calculated_prime = number_to_check;
             num_printed++;

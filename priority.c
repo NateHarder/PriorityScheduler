@@ -214,11 +214,15 @@ void create_process(int pid) {
         has not started running processes yet, print a message signaling
         the beginning. */
         current->pid = pid;
-        if (running == 0) {
-            running = 1;
-            printf("Scheduler: Time now: %d seconds\n", time);
-            printf( "Scheduling to process %d (PID %d)\n\n", current->proc_num, current->pid);
+        running = 1;
+        /* If more than one second has passed, add an s to the message. */
+        char plural_char = ' ';
+        if (time > 1) {
+            plural_char = 's';
         }
+        /* Print message for scheduling the process. */
+        printf("Scheduler: Time now: %d second%c\n", time, plural_char);
+        printf( "Scheduling to process %d (PID %d)\n\n", current->proc_num, current->pid);
     }
 }
 
@@ -277,8 +281,11 @@ void timer_handler() {
         if (running == 1) {
             check_priority();
         }
-        /* If the next process in the waiting list is paused, send a continue signal. */
+        /* If the current process is paused, send a continue signal.
+        and print a message. */
         if (active[current->proc_num] == 2) {
+            printf("Scheduler: Time now: %d second\n", time);
+            printf("Resuming process %d (PID %d)\n\n", current->proc_num, current->pid);
             kill(current->pid, SIGCONT);
         }
         /* If process is uncreated and has burst left, create and run it. */
@@ -331,13 +338,13 @@ int main(int argc, char **argv){
     timer.it_interval.tv_usec =0;
     /* Start a reaktimer. It counts down whenever this process isexecuting. */
     setitimer (ITIMER_REAL, &timer, NULL);
-    
-    /* Wait for done boolean to trigger and child processes to finish, then 
-    free the malloc'd process array and exit. */
+
+    /* Begin a loop and wait for done boolean to trigger and child processes to finish, then free the malloc'd process array and exit. Also print newline char for formatting purposes. */
+    printf("\n");
     while (done == 0) {}
     wait(NULL);
     free(processes);
-    printf("\n");
+
     return 0; 
 }
 
